@@ -1,0 +1,71 @@
+# schema.yaml
+name: astrodb_template
+description: "Database for stellar stream members from Shipp+2019 and Li+2022 profiles"
+tables:
+
+  Publications:
+    columns:
+      reference: {type: string, primary_key: true}
+      bibcode: {type: string, nullable: true}
+      description: {type: text, nullable: true}
+
+  AssociationList:
+    columns:
+      association: {type: string, primary_key: true}
+      association_type: {type: string}
+      reference: {type: string, foreign_key: Publications.reference}
+
+  Sources:
+    columns:
+      source: {type: string, primary_key: true}
+      ra_deg: {type: double}
+      dec_deg: {type: double}
+      epoch_year: {type: double, nullable: true}
+      reference: {type: string, foreign_key: Publications.reference}
+
+  Names:
+    columns:
+      source: {type: string, primary_key: true, foreign_key: Sources.source}
+      other_name: {type: string, primary_key: true}
+
+  Associations:
+    columns:
+      source: {type: string, primary_key: true, foreign_key: Sources.source}
+      association: {type: string, primary_key: true, foreign_key: AssociationList.association}
+      adopted: {type: boolean}
+      reference: {type: string, foreign_key: Publications.reference}
+      membership_probability: {type: double, nullable: true}
+
+  Parallaxes:
+    columns:
+      source: {type: string, primary_key: true, foreign_key: Sources.source}
+      parallax_mas: {type: double}
+      parallax_error: {type: double}
+      adopted: {type: boolean}
+      reference: {type: string, foreign_key: Publications.reference}
+
+  ProperMotions:
+    columns:
+      source: {type: string, primary_key: true, foreign_key: Sources.source}
+      pm_ra: {type: double}
+      pm_ra_error: {type: double}
+      pm_dec: {type: double}
+      pm_dec_error: {type: double}
+      adopted: {type: boolean}
+      reference: {type: string, foreign_key: Publications.reference}
+
+  RadialVelocities:
+    columns:
+      source: {type: string, primary_key: true, foreign_key: Sources.source}
+      rv_kms: {type: double}
+      rv_error: {type: double}
+      adopted: {type: boolean}
+      reference: {type: string, foreign_key: Publications.reference}
+
+  Photometry:
+    columns:
+      source: {type: string, primary_key: true, foreign_key: Sources.source}
+      band: {type: string, primary_key: true}
+      magnitude: {type: double}
+      magnitude_error: {type: double}
+      reference: {type: string, foreign_key: Publications.reference}
