@@ -1,0 +1,99 @@
+import json, yaml
+
+with open("column_mapping.json") as f:
+    mapping = json.load(f)
+
+with open("validation_report.json") as f:
+    report = json.load(f)
+
+errors = [r for r in report if r["severity"] == "ERROR"]
+assert not errors, f"Fix {len(errors)} validation error(s) before generating schema."
+
+DTYPE_MAP = {
+    "float64": "double",
+    "float32": "float",
+    "int64":   "long",
+    "int32":   "int",
+    "bool":    "boolean",
+    "object":  "string",
+    "str":     "string",
+}
+
+def to_felis_type(dtype_str: str) -> str:
+    return DTYPE_MAP.get(dtype_str, "string")
+
+UCD_MAP = {
+    "ra_deg":               "pos.eq.ra;meta.main",
+    "dec_deg":              "pos.eq.dec;meta.main",
+    "parallax_mas":         "pos.parallax",
+    "parallax_error":       "stat.error;pos.parallax",
+    "pm_ra":                "pos.pm;pos.eq.ra",
+    "pm_dec":               "pos.pm;pos.eq.dec",
+    "rv_kms":               "spect.dopplerVeloc.opt",
+    "rv_error":             "stat.error;spect.dopplerVeloc",
+    "magnitude":            "phot.mag",
+    "magnitude_error":      "stat.error;phot.mag",
+    "membership_probability": "stat.probability",
+}
+
+from collections import defaultdict
+
+def build_schema(mapping: list[dict], schema_name: str) -> dict:
+    # Group columns by target table
+    tables_cols = defaultdict(list)
+    for m in mapping:
+        if m.get("astrodb_table") and m.get("astrodb_field"):
+            tables_cols[m["astrodb_table"]].append(m)
+
+    tables = []
+    for table_name, cols in tables_cols.items():
+        columns = []
+        seen_fields = set()
+        for m in cols:
+            field = m["astrodb_field"]
+            if field in seen_fields:
+                continue  # deduplicate (e.g. multiple phot bands share 'magnitude')
+            seen_fields.add(field)
+            col_def = {
+                "name":     field,
+                "@id":      f"#{table_name}.{field}",
+                "datatype": to_felis_type(m["dtype"]),
+                "nullable": m.get("null_pct", 0) > 0,
+                "description": m.get("notes") or field.replace("_", " ").title(),
+            }
+            if field in UCD_MAP:
+                col_def["ivoa:ucd"] = UCD_MAP[field]
+            if m.get("unit"):
+                col_def["fits:tunit"] = m["unit"]
+            columns.append(col_def)
+
+        table_def = {
+            "name":        table_name,
+            "@id":         f"#{table_name}",
+            "description": f"AstroDB {table_name} table",
+            "columns":     columns,
+        }
+        # Add source FK for non-Sources tables
+        if table_name != "Sources" and any(c["name"] == "source" for c in columns):
+            table_def["constraints"] = [{
+                "type":               "ForeignKey",
+                "@id":                f"#{table_name}_source_fk",
+                "columns":            [f"#{table_name}.source"],
+                "referencedColumns":  ["#Sources.source"],
+            }]
+        tables.append(table_def)
+
+    return {
+        "name":        schema_name,
+        "@id":         f"#{schema_name}",
+        "description": f"AstroDB schema generated from ingestion workflow",
+        "tables":      tables,
+    }
+
+def save_schema(schema: dict, output_path: str = "schema.yaml"):
+    with open(output_path, "w") as f:
+        yaml.dump(schema, f, sort_keys=False, allow_unicode=True, width=120)
+    print(f"Saved → {output_path}")
+
+pip install lsst-felis
+felis validate schema.yaml
