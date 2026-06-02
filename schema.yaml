@@ -1,0 +1,468 @@
+name: shipp2019
+'@id': '#shipp2019'
+description: 'Stellar stream members from Shipp+2019 x Gaia EDR3 x S5/Li+2022. 146 stars in 10 streams:
+  AliqaUma, ATLAS, Chenab, Elqui, Indus, Jhelum-a, Jhelum-b, Phoenix, TucanaIII, Turranburra.'
+tables:
+- name: Sources
+  '@id': '#Sources'
+  description: Primary source table — one row per astronomical object
+  columns:
+  - name: source
+    '@id': '#Sources.source'
+    datatype: long
+    nullable: false
+    description: Source
+  - name: ra_deg
+    '@id': '#Sources.ra_deg'
+    datatype: double
+    nullable: false
+    description: Ra Deg
+    ivoa:ucd: pos.eq.ra;meta.main
+    fits:tunit: deg
+  - name: dec_deg
+    '@id': '#Sources.dec_deg'
+    datatype: double
+    nullable: false
+    description: Dec Deg
+    ivoa:ucd: pos.eq.dec;meta.main
+    fits:tunit: deg
+  - name: adopted
+    '@id': '#Sources.adopted'
+    datatype: string
+    nullable: true
+    description: Whether this is the adopted value
+    length: 100
+  - name: reference
+    '@id': '#Sources.reference'
+    datatype: string
+    nullable: true
+    description: Publication reference key
+    length: 50
+  - name: comments
+    '@id': '#Sources.comments'
+    datatype: string
+    nullable: true
+    description: Free-text notes
+    length: 500
+  primaryKey: '#Sources.source'
+- name: Names
+  '@id': '#Names'
+  description: Alternative names and cross-match identifiers
+  columns:
+  - name: source
+    '@id': '#Names.source'
+    datatype: string
+    nullable: true
+    description: Foreign key to Sources.source
+    length: 100
+  - name: other_name
+    '@id': '#Names.other_name'
+    datatype: double
+    nullable: true
+    description: Other Name
+  - name: adopted
+    '@id': '#Names.adopted'
+    datatype: string
+    nullable: true
+    description: Whether this is the adopted value
+    length: 100
+  - name: reference
+    '@id': '#Names.reference'
+    datatype: string
+    nullable: true
+    description: Publication reference key
+    length: 50
+  - name: comments
+    '@id': '#Names.comments'
+    datatype: string
+    nullable: true
+    description: Free-text notes
+    length: 500
+  constraints:
+  - type: ForeignKey
+    '@id': '#Names_source_fk'
+    name: Names_source_fk
+    columns:
+    - '#Names.source'
+    referencedColumns:
+    - '#Sources.source'
+- name: AssociationList
+  '@id': '#AssociationList'
+  description: Lookup table of known stellar associations/streams
+  columns:
+  - name: association
+    '@id': '#AssociationList.association'
+    datatype: string
+    nullable: false
+    description: Association
+    length: 100
+  - name: comments
+    '@id': '#AssociationList.comments'
+    datatype: string
+    nullable: true
+    description: Comments
+    length: 500
+  - name: adopted
+    '@id': '#AssociationList.adopted'
+    datatype: string
+    nullable: true
+    description: Whether this is the adopted value
+    length: 100
+  - name: reference
+    '@id': '#AssociationList.reference'
+    datatype: string
+    nullable: true
+    description: Publication reference key
+    length: 50
+- name: Associations
+  '@id': '#Associations'
+  description: Source membership in associations with probability
+  columns:
+  - name: source
+    '@id': '#Associations.source'
+    datatype: string
+    nullable: true
+    description: Foreign key to Sources.source
+    length: 100
+  - name: membership_probability
+    '@id': '#Associations.membership_probability'
+    datatype: double
+    nullable: false
+    description: Membership Probability
+    ivoa:ucd: stat.probability
+  - name: adopted
+    '@id': '#Associations.adopted'
+    datatype: string
+    nullable: true
+    description: Whether this is the adopted value
+    length: 100
+  - name: reference
+    '@id': '#Associations.reference'
+    datatype: string
+    nullable: true
+    description: Publication reference key
+    length: 50
+  - name: comments
+    '@id': '#Associations.comments'
+    datatype: string
+    nullable: true
+    description: Free-text notes
+    length: 500
+  constraints:
+  - type: ForeignKey
+    '@id': '#Associations_source_fk'
+    name: Associations_source_fk
+    columns:
+    - '#Associations.source'
+    referencedColumns:
+    - '#Sources.source'
+- name: Parallaxes
+  '@id': '#Parallaxes'
+  description: Trigonometric parallax measurements (Gaia EDR3)
+  columns:
+  - name: source
+    '@id': '#Parallaxes.source'
+    datatype: string
+    nullable: true
+    description: Foreign key to Sources.source
+    length: 100
+  - name: parallax_mas
+    '@id': '#Parallaxes.parallax_mas'
+    datatype: double
+    nullable: false
+    description: Parallax Mas
+    ivoa:ucd: pos.parallax
+    fits:tunit: mas
+  - name: parallax_error
+    '@id': '#Parallaxes.parallax_error'
+    datatype: double
+    nullable: false
+    description: Parallax Error
+    ivoa:ucd: stat.error;pos.parallax
+    fits:tunit: mas
+  - name: adopted
+    '@id': '#Parallaxes.adopted'
+    datatype: string
+    nullable: true
+    description: Whether this is the adopted value
+    length: 100
+  - name: reference
+    '@id': '#Parallaxes.reference'
+    datatype: string
+    nullable: true
+    description: Publication reference key
+    length: 50
+  - name: comments
+    '@id': '#Parallaxes.comments'
+    datatype: string
+    nullable: true
+    description: Free-text notes
+    length: 500
+  constraints:
+  - type: ForeignKey
+    '@id': '#Parallaxes_source_fk'
+    name: Parallaxes_source_fk
+    columns:
+    - '#Parallaxes.source'
+    referencedColumns:
+    - '#Sources.source'
+- name: ProperMotions
+  '@id': '#ProperMotions'
+  description: Proper motion measurements (Gaia EDR3)
+  columns:
+  - name: source
+    '@id': '#ProperMotions.source'
+    datatype: string
+    nullable: true
+    description: Foreign key to Sources.source
+    length: 100
+  - name: pm_ra
+    '@id': '#ProperMotions.pm_ra'
+    datatype: double
+    nullable: false
+    description: Pm Ra
+    ivoa:ucd: pos.pm;pos.eq.ra
+    fits:tunit: mas/yr
+  - name: pm_ra_error
+    '@id': '#ProperMotions.pm_ra_error'
+    datatype: double
+    nullable: false
+    description: Pm Ra Error
+    ivoa:ucd: stat.error;pos.pm;pos.eq.ra
+    fits:tunit: mas/yr
+  - name: pm_dec
+    '@id': '#ProperMotions.pm_dec'
+    datatype: double
+    nullable: false
+    description: Pm Dec
+    ivoa:ucd: pos.pm;pos.eq.dec
+    fits:tunit: mas/yr
+  - name: pm_dec_error
+    '@id': '#ProperMotions.pm_dec_error'
+    datatype: double
+    nullable: false
+    description: Pm Dec Error
+    ivoa:ucd: stat.error;pos.pm;pos.eq.dec
+    fits:tunit: mas/yr
+  - name: adopted
+    '@id': '#ProperMotions.adopted'
+    datatype: string
+    nullable: true
+    description: Whether this is the adopted value
+    length: 100
+  - name: reference
+    '@id': '#ProperMotions.reference'
+    datatype: string
+    nullable: true
+    description: Publication reference key
+    length: 50
+  - name: comments
+    '@id': '#ProperMotions.comments'
+    datatype: string
+    nullable: true
+    description: Free-text notes
+    length: 500
+  constraints:
+  - type: ForeignKey
+    '@id': '#ProperMotions_source_fk'
+    name: ProperMotions_source_fk
+    columns:
+    - '#ProperMotions.source'
+    referencedColumns:
+    - '#Sources.source'
+- name: RadialVelocities
+  '@id': '#RadialVelocities'
+  description: Radial velocities from S5/Li+2022 (85/146 sources)
+  columns:
+  - name: source
+    '@id': '#RadialVelocities.source'
+    datatype: string
+    nullable: true
+    description: Foreign key to Sources.source
+    length: 100
+  - name: rv_kms
+    '@id': '#RadialVelocities.rv_kms'
+    datatype: double
+    nullable: true
+    description: nullable — only 85/146 sources have S5 radial velocities
+    ivoa:ucd: spect.dopplerVeloc.opt
+    fits:tunit: km/s
+  - name: rv_error
+    '@id': '#RadialVelocities.rv_error'
+    datatype: double
+    nullable: true
+    description: nullable — only 85/146 sources have S5 radial velocities
+    ivoa:ucd: stat.error;spect.dopplerVeloc
+    fits:tunit: km/s
+  - name: adopted
+    '@id': '#RadialVelocities.adopted'
+    datatype: string
+    nullable: true
+    description: Whether this is the adopted value
+    length: 100
+  - name: reference
+    '@id': '#RadialVelocities.reference'
+    datatype: string
+    nullable: true
+    description: Publication reference key
+    length: 50
+  - name: comments
+    '@id': '#RadialVelocities.comments'
+    datatype: string
+    nullable: true
+    description: Free-text notes
+    length: 500
+  constraints:
+  - type: ForeignKey
+    '@id': '#RadialVelocities_source_fk'
+    name: RadialVelocities_source_fk
+    columns:
+    - '#RadialVelocities.source'
+    referencedColumns:
+    - '#Sources.source'
+- name: Photometry
+  '@id': '#Photometry'
+  description: 'Multi-band photometry: Gaia G (corrected), BP, RP'
+  columns:
+  - name: source
+    '@id': '#Photometry.source'
+    datatype: string
+    nullable: true
+    description: Foreign key to Sources.source
+    length: 100
+  - name: magnitude
+    '@id': '#Photometry.magnitude'
+    datatype: double
+    nullable: false
+    description: Magnitude
+    ivoa:ucd: phot.mag
+    fits:tunit: mag
+  - name: magnitude_error
+    '@id': '#Photometry.magnitude_error'
+    datatype: double
+    nullable: false
+    description: Magnitude Error
+    ivoa:ucd: stat.error;phot.mag
+    fits:tunit: mag
+  - name: adopted
+    '@id': '#Photometry.adopted'
+    datatype: string
+    nullable: true
+    description: Whether this is the adopted value
+    length: 100
+  - name: reference
+    '@id': '#Photometry.reference'
+    datatype: string
+    nullable: true
+    description: Publication reference key
+    length: 50
+  - name: comments
+    '@id': '#Photometry.comments'
+    datatype: string
+    nullable: true
+    description: Free-text notes
+    length: 500
+  constraints:
+  - type: ForeignKey
+    '@id': '#Photometry_source_fk'
+    name: Photometry_source_fk
+    columns:
+    - '#Photometry.source'
+    referencedColumns:
+    - '#Sources.source'
+- name: Positions
+  '@id': '#Positions'
+  description: Epoch 2000 positions from Shipp+2019
+  columns:
+  - name: source
+    '@id': '#Positions.source'
+    datatype: string
+    nullable: true
+    description: Foreign key to Sources.source
+    length: 100
+  - name: ra_deg
+    '@id': '#Positions.ra_deg'
+    datatype: double
+    nullable: false
+    description: Ra Deg
+    ivoa:ucd: pos.eq.ra;meta.main
+    fits:tunit: deg
+  - name: dec_deg
+    '@id': '#Positions.dec_deg'
+    datatype: double
+    nullable: false
+    description: Dec Deg
+    ivoa:ucd: pos.eq.dec;meta.main
+    fits:tunit: deg
+  - name: adopted
+    '@id': '#Positions.adopted'
+    datatype: string
+    nullable: true
+    description: Whether this is the adopted value
+    length: 100
+  - name: reference
+    '@id': '#Positions.reference'
+    datatype: string
+    nullable: true
+    description: Publication reference key
+    length: 50
+  - name: comments
+    '@id': '#Positions.comments'
+    datatype: string
+    nullable: true
+    description: Free-text notes
+    length: 500
+  constraints:
+  - type: ForeignKey
+    '@id': '#Positions_source_fk'
+    name: Positions_source_fk
+    columns:
+    - '#Positions.source'
+    referencedColumns:
+    - '#Sources.source'
+- name: ModeledParameters
+  '@id': '#ModeledParameters'
+  description: 'Derived quantities: metallicity, astrometric flags, quality metrics'
+  columns:
+  - name: source
+    '@id': '#ModeledParameters.source'
+    datatype: string
+    nullable: true
+    description: Foreign key to Sources.source
+    length: 100
+  - name: value
+    '@id': '#ModeledParameters.value'
+    datatype: double
+    nullable: false
+    description: Value
+  - name: error
+    '@id': '#ModeledParameters.error'
+    datatype: double
+    nullable: false
+    description: Error
+  - name: adopted
+    '@id': '#ModeledParameters.adopted'
+    datatype: string
+    nullable: true
+    description: Whether this is the adopted value
+    length: 100
+  - name: reference
+    '@id': '#ModeledParameters.reference'
+    datatype: string
+    nullable: true
+    description: Publication reference key
+    length: 50
+  - name: comments
+    '@id': '#ModeledParameters.comments'
+    datatype: string
+    nullable: true
+    description: Free-text notes
+    length: 500
+  constraints:
+  - type: ForeignKey
+    '@id': '#ModeledParameters_source_fk'
+    name: ModeledParameters_source_fk
+    columns:
+    - '#ModeledParameters.source'
+    referencedColumns:
+    - '#Sources.source'
